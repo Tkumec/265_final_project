@@ -1,5 +1,2 @@
-git config --global --edit
-
-After doing this, you may fix the identity used for this commit with:
-  
-  git commit --amend --reset-author
+git config --global user.name "Trevor Kumec"
+git config --global user.email tkumec@ucsc.edu
