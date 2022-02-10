@@ -29,3 +29,8 @@ ycwa_data <- path2 %>%
 
 ycwa_data <- ycwa_data %>%
   mutate(dataset = "YCWA")
+
+##Join the tables
+
+combined_welldata <- rbind(pmw_data, ycwa_data)
+
