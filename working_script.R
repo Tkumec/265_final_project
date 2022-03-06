@@ -33,24 +33,29 @@ ycwa_data <- ycwa_data %>%
 
 combined_welldata <- rbind(pmw_data, ycwa_data)
 
+##Remove odd value
+combined_welldata <- combined_welldata[-c(1),]
+
 ##1963 observation needs to go 
 combined_welldata <- filter(combined_welldata, Date > 1980)
 
-combined_welldata %>%
-  ggplot(aes(x=Date, y=GW_Below_RP, color = SWN)) +
-  geom_point() +
-  facet_wrap("SWN")
+#combined_welldata %>%
+#  ggplot(aes(x=Date, y=GW_Below_RP, color = SWN)) +
+#  geom_point() +
+#  facet_wrap("SWN")
 
-#####USGS streamflow data
+#####USGS streamflow data, tidying up
 
-raw_gauge_data <- read.table("data/yuba_cfs_2016_2021.txt", sep="\t", header=TRUE)
+streamflow_data <- read.table("data/yuba_cfs_2016_2021.txt", sep="\t", header=TRUE)
 
-raw_gauge_data <- select(raw_gauge_data, -c("X15678_00060_cd"))
-raw_gauge_data <- raw_gauge_data[-c(1),]
+streamflow_data <- select(streamflow_data, -c("X15678_00060_cd")) %>%
+    streamflow_data[-c(1),]
+
+streamflow_data <- rename(streamflow_data, discharge_cfs = X15678_00060)
 
 ##Fix datetime for USGS gauge data- Adding columns for each component
 
-raw_gauge_data <- raw_gauge_data %>%
+streamflow_data <- streamflow_data %>%
   mutate(Year = year(datetime)) %>%
   mutate(Month = month(datetime)) %>%
   mutate(Day = day(datetime)) %>%
@@ -65,7 +70,7 @@ combined_welldata <- combined_welldata %>%
 
 ##Create water year for well data
 
-wtr_yr <- function(dates, start_month=9) {
+wtr_yr <- function(dates, start_month) {
   # Convert dates into POSIXlt
   dates.posix = as.POSIXlt(dates)
   # Year offset
@@ -76,15 +81,14 @@ wtr_yr <- function(dates, start_month=9) {
   adj.year
 }
 
+combined_welldata <- combined_welldata %>% 
+  mutate(wtr_yr = wtr_yr(Date, 10))
 
-water_year <- wtr_yr(combined_welldata$Date, 10)
-df = data.frame(combined_welldata, wtr_yr=wtr_yr(combined_welldata$Date, 10))
-colnames(df) <- c("Date", "water_year")
-
- 
+streamflow_data <- streamflow_data %>%
+  mutate(wtr_yr = wtr_yr(datetime, 10))
 
 
-##Experiment with grouping
+
 
 
 
